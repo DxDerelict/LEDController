@@ -3,15 +3,15 @@ package sample;
 import jssc.SerialPort;
 import jssc.SerialPortException;
 
-public class SerialComms {
+public class SerialComms{
     SerialPort serialPort;
     boolean init;
 
 
-    public void serialInitialize() {
+    public void serialInitialize(int baudRate, int dataBits) {
         try {
             System.out.println("Open Ports " + serialPort.openPort());
-            System.out.println("Set parameters " + serialPort.setParams(9600, 8, 1, 0));
+            System.out.println("Set parameters " + serialPort.setParams(baudRate, dataBits, 1, 0));
             Thread.sleep(3000);
             init = true;
         }
@@ -28,15 +28,15 @@ public class SerialComms {
             data[2] = (byte)rgbValue[1];
             data[3] = (byte)rgbValue[2];
             System.out.println("\"Send RGB: " + rgbValue[0] + "," + rgbValue[1] + "," + rgbValue[2] + " " + serialPort.writeBytes(data));
-            //System.out.println("Port closed: " + serialPort.closePort());
+            //System.out.println("Port closed: " + serialPort.c
+            // losePort());
         }
         catch (SerialPortException ex){
             System.out.println(ex);
         }
     }
-
-
-
-
+    public void serialWrite(byte data) throws SerialPortException {
+        serialPort.writeByte(data);
+    }
 
 }
