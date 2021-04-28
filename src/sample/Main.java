@@ -1,10 +1,9 @@
 package sample;
 
+import com.fazecast.jSerialComm.SerialPort;
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,14 +16,19 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import jssc.SerialPort;
-import jssc.SerialPortException;
-import jssc.SerialPortList;
+
+import java.io.OutputStream;
+
 
 public class Main extends Application {
     boolean lightSwitchState = false;
-    int[] RGB = new int[4];
+    volatile int[] RGB = {0, 155, 145, 125};
     String[] portNames;
+    String chosenPortName;
+    public static SerialPort pickedPort;
+    int selectedIndex;
+    boolean isComConnected = false;
+
 
     Label redVal = new Label(String.valueOf(RGB[1]));
     Label blueVal = new Label(String.valueOf(RGB[2]));
@@ -36,22 +40,31 @@ public class Main extends Application {
 
     Button lightSwitch = new Button("On/Off");
     Button connectButton = new Button("Connect");
+    Button sendButton = new Button("Send");
 
-    private void updateSerialData(int[] RGB){
+    private byte[] sendToSerial(int[] RGB){
+//        String RGBString = " ";
+//        for(int i =0; i< RGB.length; i++) {
+//            RGBString += String.valueOf(RGB[i]) + ' ';
+//        }
+//        byte[] msg = RGBString.getBytes();
 
+        byte[] msg = String.valueOf(RGB[1] + ' ').getBytes();
 
+        OutputStream serialOut = pickedPort.getOutputStream();
 
+        System.out.print("sendToSerial Sent : ");
+        return msg;
     }
 
 
-    private void detectPort() {
-        ObservableList<String> portList;
-        portList = FXCollections.observableArrayList();
-        portNames = SerialPortList.getPortNames();
-//        for (String name : portNames) {
-//            System.out.println(name);
-//            portList.add(name);
-//        }
+    private void detectPorts() {
+        SerialPort[] AvailableComPorts= SerialPort.getCommPorts();
+        portNames = new String[AvailableComPorts.length];
+        for (int i = 0; i < AvailableComPorts.length; i++) {
+            //System.out.println(AvailableComPorts[i].getDescriptivePortName());
+            portNames[i] = AvailableComPorts[i].getDescriptivePortName();
+        }
     }
 
     private void sliderChanged(){
@@ -63,7 +76,6 @@ public class Main extends Application {
 
         RGB[3] = (int) greenSlider.getValue();
         greenVal.setText(String.valueOf(RGB[3]));
-
     }
 
     private void setupGUI(){
@@ -100,45 +112,59 @@ public class Main extends Application {
     }
 
     public void start(Stage stage) {
-        detectPort();
+        detectPorts();
         setupGUI();
 
 
         ComboBox serialComboList = new ComboBox();
         serialComboList.getItems().addAll(portNames);
         serialComboList.setPromptText("Choose COM Port");
-        serialComboList.valueProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue ov, String t, String t1) {
-
-            }
+        serialComboList.setOnAction((event) -> {
+            selectedIndex = serialComboList.getSelectionModel().getSelectedIndex();
+            Object selectedItem = serialComboList.getSelectionModel().getSelectedItem();
+            System.out.println("Selection made: [" + selectedIndex + "] " + selectedItem);
+            chosenPortName = (String) serialComboList.getValue();
         });
+
 
         connectButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
-                if(serialComboList.getValue() != null){
-                    try {
-                        SerialPort serialPort =
-                                new SerialPort(serialComboList.getValue().toString());
 
-                        serialPort.openPort();
-                        serialPort.setParams(
-                                SerialPort.BAUDRATE_9600,
-                                SerialPort.DATABITS_8,
-                                SerialPort.STOPBITS_1,
-                                SerialPort.PARITY_NONE);
-                       // serialPort.writeBytes(RGB[1].toByte);
+                    SerialPort[] AvailableComPorts = SerialPort.getCommPorts();
+                    if (serialComboList.getValue() != null) {
+                        pickedPort = AvailableComPorts[selectedIndex];
+                        System.out.println(pickedPort.getDescriptivePortName());
 
+                        if (pickedPort.openPort()) {
+                            isComConnected = true;
+                            connectButton.setText("Disconnect");
 
-                    } catch (SerialPortException ex) {
-                       System.out.println("Cant connect to Serial port");
+                            pickedPort.setComPortTimeouts(pickedPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+                        } else {
+                            System.out.println("Cant connect to Serial port");
+                        }
+
+                    } else {
+                        System.out.println("No SerialPort selected!");
                     }
+//                if (isComConnected == false) {
+//                }
+//
+//                if(isComConnected){
+//                    connectButton.setText("Connect");
+//                    pickedPort.closePort();
+//                    isComConnected =!isComConnected;
+//
+//                }
+            }
+        });
 
-                }else{
-                    System.out.println("No SerialPort selected!");
-                }
+        sendButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            public void handle(MouseEvent event) {
+                System.out.println("Sent" + RGB[1]);
+                pickedPort.writeBytes(sendToSerial(RGB), 10);
 
-                }
+            }
         });
 
 
@@ -146,11 +172,15 @@ public class Main extends Application {
             public void handle(MouseEvent event) {
                 System.out.println("lightSwitch clicked");
                 lightSwitchState = !lightSwitchState;
-                if(lightSwitchState) lightSwitch.setText("ON");
-                    else lightSwitch.setText("OFF");
-
-            }
-        });
+                    if (lightSwitchState) {
+                        lightSwitch.setText("ON");
+                        RGB[0] = 255;
+                    } else {
+                        lightSwitch.setText("OFF");
+                        RGB[0] = 155;
+                    }
+                }
+            });
 
         {
             GridPane gridPane = new GridPane();
@@ -162,6 +192,7 @@ public class Main extends Application {
 
             gridPane.add(serialComboList, 0, 0);
             gridPane.add(connectButton, 0, 1);
+            gridPane.add(sendButton, 0,2);
             gridPane.add(redSlider, 1, 0);
             gridPane.add(blueSlider, 1, 1);
             gridPane.add(greenSlider, 1, 2);
