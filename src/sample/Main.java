@@ -17,8 +17,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.io.OutputStream;
-
 
 public class Main extends Application {
     boolean lightSwitchState = false;
@@ -43,17 +41,11 @@ public class Main extends Application {
     Button sendButton = new Button("Send");
 
     private byte[] sendToSerial(int[] RGB){
-//        String RGBString = " ";
-//        for(int i =0; i< RGB.length; i++) {
-//            RGBString += String.valueOf(RGB[i]) + ' ';
-//        }
-//        byte[] msg = RGBString.getBytes();
-
-        byte[] msg = String.valueOf(RGB[1] + ' ').getBytes();
-
-        OutputStream serialOut = pickedPort.getOutputStream();
-
-        System.out.print("sendToSerial Sent : ");
+        String RGBString = " ";
+        for(int i =0; i< RGB.length; i++) {
+            RGBString += String.valueOf(RGB[i]) + '/';
+        }
+        byte[] msg = RGBString.getBytes();
         return msg;
     }
 
@@ -76,6 +68,7 @@ public class Main extends Application {
 
         RGB[3] = (int) greenSlider.getValue();
         greenVal.setText(String.valueOf(RGB[3]));
+        pickedPort.writeBytes(sendToSerial(RGB), 15);
     }
 
     private void setupGUI(){
@@ -129,17 +122,15 @@ public class Main extends Application {
 
         connectButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
-
                     SerialPort[] AvailableComPorts = SerialPort.getCommPorts();
                     if (serialComboList.getValue() != null) {
                         pickedPort = AvailableComPorts[selectedIndex];
                         System.out.println(pickedPort.getDescriptivePortName());
 
-                        if (pickedPort.openPort()) {
+                        if (pickedPort.openPort() ) {
                             isComConnected = true;
-                            connectButton.setText("Disconnect");
-
-                            pickedPort.setComPortTimeouts(pickedPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
+                            pickedPort.setBaudRate(115200);
+                            // pickedPort.setComPortTimeouts(pickedPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0);
                         } else {
                             System.out.println("Cant connect to Serial port");
                         }
@@ -147,22 +138,23 @@ public class Main extends Application {
                     } else {
                         System.out.println("No SerialPort selected!");
                     }
-//                if (isComConnected == false) {
-//                }
-//
-//                if(isComConnected){
-//                    connectButton.setText("Connect");
-//                    pickedPort.closePort();
-//                    isComConnected =!isComConnected;
-//
-//                }
+
+                if(isComConnected){
+                    connectButton.setText("Disconnect");
+
+                }else{
+                    pickedPort.closePort();
+                    isComConnected = false;
+                    connectButton.setText("Connect");
+                }
+
             }
         });
 
         sendButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             public void handle(MouseEvent event) {
                 System.out.println("Sent" + RGB[1]);
-                pickedPort.writeBytes(sendToSerial(RGB), 10);
+                pickedPort.writeBytes(sendToSerial(RGB), 15);
 
             }
         });
@@ -174,11 +166,12 @@ public class Main extends Application {
                 lightSwitchState = !lightSwitchState;
                     if (lightSwitchState) {
                         lightSwitch.setText("ON");
-                        RGB[0] = 255;
+                        RGB[0] = 1;
                     } else {
                         lightSwitch.setText("OFF");
-                        RGB[0] = 155;
+                        RGB[0] = 0;
                     }
+                pickedPort.writeBytes(sendToSerial(RGB), 15);
                 }
             });
 
@@ -192,7 +185,7 @@ public class Main extends Application {
 
             gridPane.add(serialComboList, 0, 0);
             gridPane.add(connectButton, 0, 1);
-            gridPane.add(sendButton, 0,2);
+            //gridPane.add(sendButton, 0,2);
             gridPane.add(redSlider, 1, 0);
             gridPane.add(blueSlider, 1, 1);
             gridPane.add(greenSlider, 1, 2);

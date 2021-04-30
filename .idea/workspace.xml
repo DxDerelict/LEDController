@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="cdb932d9-7e58-4d94-93a9-e7b232ef17da" name="Default" comment="Lots of stuff, idk">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/jSerialComm_2_7_0.xml" afterDir="false" />
+    <list default="true" id="cdb932d9-7e58-4d94-93a9-e7b232ef17da" name="Default" comment="Serial working, kind of">
+      <change afterPath="$PROJECT_DIR$/JavaRGBProj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LEDController.iml" beforeDir="false" afterPath="$PROJECT_DIR$/LEDController.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/sample/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/sample/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -82,6 +81,9 @@
       <filtered-out-file-type name="TAG" />
       <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
     </file-type-list>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://$USER_HOME$/.jdks/openjdk-16/lib/src.zip!/java.base/java/lang/Integer.java" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
@@ -172,6 +174,9 @@
     <property name="recentsLimit" value="5" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Console Colors" />
+  </component>
+  <component name="ReaderModeSettings">
+    <option name="enabled" value="false" />
   </component>
   <component name="RecentsManager">
     <key name="CreateTestDialog.Recents.Supers">
@@ -357,7 +362,14 @@
       <option name="project" value="LOCAL" />
       <updated>1618888898951</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Serial working, kind of">
+      <created>1619590773374</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1619590773374</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -411,7 +423,8 @@
     <MESSAGE value="Started Project, Added on/off button" />
     <MESSAGE value="Added sliders &amp; label for each color val. &#10;Implemented gridpane" />
     <MESSAGE value="Lots of stuff, idk" />
-    <option name="LAST_COMMIT_MESSAGE" value="Lots of stuff, idk" />
+    <MESSAGE value="Serial working, kind of" />
+    <option name="LAST_COMMIT_MESSAGE" value="Serial working, kind of" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

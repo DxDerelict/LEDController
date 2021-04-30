@@ -1,0 +1,67 @@
+//This code is for the arduino RGB controller that will take serial communication from the java applet
+//and parse the data to display the desired color/brightness
+// Made By Elie Louisa
+#include  <U8g2lib.h>
+
+U8X8_SSD1306_128X64_NONAME_HW_I2C display(U8X8_PIN_NONE);
+String inputString = "";
+String CharBuffer;
+
+const int RGB_PINS[3] = {9,10,11};
+
+int RGB[5];
+
+void setup() {
+  Serial.begin(115200);
+  for(int K = 0; K<3; K++){
+    pinMode(RGB_PINS[K], OUTPUT);
+  }
+  display.begin();
+  display.setFont(u8x8_font_pxplusibmcgathin_f);
+  delay(100);
+
+  display.clearDisplay();
+  display.drawString(8, 1 , "Hello");
+  delay(1000);
+
+  display.clearDisplay();
+}
+
+void loop() {
+  int nBytes;   // If anything comes in Serial (USB)
+  inputString = "";
+  int j = 0;
+  if (nBytes = Serial.available()) {
+    display.clear();
+    for (int i = 0; i < nBytes; i++) {
+      char inChar = (char)Serial.read();
+      inputString += inChar;
+    }
+    Serial.flush();
+//    display.println(inputString);
+
+    CharBuffer = "";
+    for (int i = 0; i < 14; i++) {
+      if (inputString[i] != '/') {
+        CharBuffer += inputString[i];
+      }
+      else if (j < 4) {
+        RGB[j] = CharBuffer.toInt();
+        j++;
+        CharBuffer = "";
+      }
+
+    }
+    display.println();
+    display.println();
+
+
+    for (int i = 1; i < 4; i++) {
+      display.println(RGB[i]);
+      analogWrite( RGB_PINS[i-1], RGB[i] * RGB[0]);
+    }
+    display.println();
+  }
+
+
+}
